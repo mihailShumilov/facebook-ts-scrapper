@@ -1,5 +1,7 @@
 import * as yargs from "yargs";
-import {Browser} from "./Browser";
+import {Browser} from "./class/Browser";
+import Parser from "./class/Parser";
+import {Post} from "./@types/Post";
 
 
 (async () => {
@@ -55,9 +57,6 @@ import {Browser} from "./Browser";
         })
         .argv;
 
-    console.log('ARGV: ', argv);
-    console.log('ENV: ', process.env);
-
     const browser = new Browser({
         host: argv.proxyHost,
         port: argv.proxyPort,
@@ -65,4 +64,16 @@ import {Browser} from "./Browser";
         pass: argv.proxyPass
     }, argv.cookie);
 
+    await browser.init();
+
+    const parser = new Parser({
+        link: argv.link,
+        login: argv.login,
+        password: argv.password,
+        browser: browser
+    });
+
+    const posts: Post[] = await parser.run();
+
+    console.log(JSON.stringify(posts));
 })();

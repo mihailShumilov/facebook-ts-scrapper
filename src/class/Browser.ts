@@ -1,5 +1,5 @@
 import * as puppeteer from 'puppeteer';
-import {Proxy} from "./@types/Proxy";
+import {Proxy} from "../@types/Proxy";
 import {Page} from "puppeteer";
 
 
@@ -11,16 +11,14 @@ export class Browser {
 
     private readonly cookiePath: string;
 
-    private headless: boolean = (process.env.NODE_ENV === 'dev');
+    private headless: boolean = (process.env.NODE_ENV !== 'dev');
 
     constructor(proxy: Proxy, cookiePath: string) {
         this.proxy = proxy;
         this.cookiePath = cookiePath;
-        this.init().then(r => {
-        });
     }
 
-    private async init(): Promise<void> {
+    public async init(): Promise<void> {
         this._browser = await puppeteer.launch({
             headless: this.headless,
             userDataDir: this.cookiePath,
@@ -29,10 +27,12 @@ export class Browser {
                 '--proxy-server=' + this.proxy.host + ':' + this.proxy.port,
                 '--disable-session-crashed-bubble',
                 '--disable-restore-session-state',
+                // '--no-sandbox',
+                // '--disable-setuid-sandbox'
             ]
         });
 
-        this._browser.on('disconnected', () => {
+        this._browser.on('disconnected', async () => {
             console.log('Browser disconnected!!!!');
             process.exit();
         });
